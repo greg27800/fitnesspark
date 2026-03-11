@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FitnessPark">
+<meta name="theme-color" content="#0D0D0F">
+<title>FitnessPark Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --orange:#E8591A; --orange2:#FF7A3D; --dark:#0D0D0F; --dark2:#161618;
+  --dark3:#1E1E22; --dark4:#28282E; --text:#F0EEE8; --muted:#7A7A85;
+  --green:#4ADE80;
+  --safe-top:env(safe-area-inset-top,44px);
+  --safe-bottom:env(safe-area-inset-bottom,20px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--dark);color:var(--text);font-family:'Barlow',sans-serif;overflow:hidden;position:fixed;width:100%}
+.screen{position:absolute;inset:0;display:none;flex-direction:column}
+.screen.active{display:flex}
+
+/* HOME */
+#home{background:var(--dark);overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:calc(var(--safe-top) + 16px);padding-bottom:calc(var(--safe-bottom) + 90px)}
+.home-header{padding:8px 24px 20px}
+.home-logo{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:3px;color:var(--orange);text-transform:uppercase;margin-bottom:4px}
+.home-title{font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:900;line-height:1;color:var(--text);text-transform:uppercase}
+.home-title span{color:var(--orange)}
+.home-subtitle{font-size:13px;color:var(--muted);margin-top:4px}
+.progress-ring-wrap{display:flex;justify-content:center;padding:12px 0 20px;position:relative}
+.progress-ring-wrap svg{transform:rotate(-90deg)}
+.ring-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.ring-pct{font-family:'Barlow Condensed',sans-serif;font-size:44px;font-weight:900;color:var(--orange);line-height:1}
+.ring-sub{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.phase-cards{display:flex;flex-direction:column;gap:10px;padding:0 16px}
+.phase-card{background:var(--dark3);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;border:1.5px solid transparent;position:relative;overflow:hidden;transition:transform .15s,background .15s}
+.phase-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--phase-color,var(--orange));border-radius:4px 0 0 4px}
+.phase-card:active{transform:scale(.98);background:var(--dark4)}
+.phase-card.done{border-color:var(--green);opacity:.7}
+.phase-card.done::before{background:var(--green)}
+.phase-card.active-phase{border-color:var(--orange)}
+.phase-icon{font-size:28px;flex-shrink:0;width:44px;text-align:center}
+.phase-info{flex:1;min-width:0}
+.phase-name{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.phase-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.phase-progress{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.phase-count{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700}
+.phase-count.done-count{color:var(--green)}
+.phase-bar-wrap{width:60px;height:4px;background:var(--dark4);border-radius:99px;overflow:hidden}
+.phase-bar{height:100%;background:var(--phase-color,var(--orange));border-radius:99px;transition:width .4s ease}
+.phase-card.done .phase-bar{background:var(--green)}
+.start-btn{margin:20px 16px 0;background:var(--orange);color:white;border:none;border-radius:16px;padding:18px;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;letter-spacing:2px;text-transform:uppercase;width:calc(100% - 32px);cursor:pointer;transition:transform .15s,background .15s}
+.start-btn:active{transform:scale(.97);background:var(--orange2)}
+.reset-btn{margin:10px 16px 0;background:transparent;color:var(--muted);border:1px solid var(--dark4);border-radius:12px;padding:12px;font-size:13px;width:calc(100% - 32px);cursor:pointer}
+.reset-btn:active{color:var(--orange)}
+
+/* WORKOUT */
+#workout{background:var(--dark);overflow:hidden}
+.workout-header{padding:calc(var(--safe-top) + 10px) 20px 14px;background:var(--dark2);border-bottom:1px solid var(--dark3);flex-shrink:0}
+.workout-nav{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.back-btn{width:36px;height:36px;background:var(--dark3);border:none;border-radius:10px;color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.back-btn:active{background:var(--dark4)}
+.workout-phase-name{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:1px;flex:1}
+.workout-phase-badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px;background:var(--orange);color:white;letter-spacing:.5px;flex-shrink:0}
+.overall-progress-bar{height:3px;background:var(--dark4);border-radius:99px;overflow:hidden}
+.overall-progress-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange2));border-radius:99px;transition:width .4s ease}
+.exercises-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 16px calc(var(--safe-bottom) + 100px)}
+
+/* EXERCISE CARD */
+.ex-card{background:var(--dark2);border-radius:18px;margin-bottom:10px;overflow:hidden;border:1.5px solid var(--dark3);transition:border-color .2s}
+.ex-card.completed{border-color:var(--green);opacity:.6}
+.ex-header{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer}
+.ex-icon-wrap{width:46px;height:46px;background:var(--dark3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.ex-card.completed .ex-icon-wrap{background:rgba(74,222,128,.12)}
+.ex-info{flex:1;min-width:0}
+.ex-name{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ex-card.completed .ex-name{color:var(--green)}
+.ex-meta{display:flex;gap:6px;margin-top:3px;flex-wrap:wrap}
+.ex-tag{font-size:11px;color:var(--muted);background:var(--dark3);padding:2px 8px;border-radius:6px;font-weight:500}
+.ex-tag.orange{color:var(--orange);background:rgba(232,89,26,.12)}
+.ex-chevron{font-size:14px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.ex-card.open .ex-chevron{transform:rotate(90deg)}
+.ex-card.completed .ex-chevron{color:var(--green)}
+.ex-body{display:none;padding:0 16px 16px;border-top:1px solid var(--dark3)}
+.ex-card.open .ex-body{display:block}
+
+/* ANIMATION CONTAINER */
+.anim-container{background:var(--dark3);border-radius:14px;margin:12px 0;overflow:hidden;position:relative;height:140px;display:flex;align-items:center;justify-content:center}
+.anim-label{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;white-space:nowrap;background:var(--dark3);padding:2px 8px;border-radius:99px}
+
+.ex-tip{font-size:12px;color:var(--muted);font-style:italic;margin:8px 0 12px;padding:10px 12px;background:var(--dark3);border-radius:10px;border-left:3px solid var(--orange);line-height:1.5}
+.sets-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600;margin-bottom:8px}
+.sets-grid{display:flex;gap:8px;flex-wrap:wrap}
+.set-btn{flex:1;min-width:56px;max-width:80px;height:64px;background:var(--dark3);border:2px solid var(--dark4);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;color:var(--text);gap:2px}
+.set-btn:active{transform:scale(.93)}
+.set-btn.done{background:rgba(74,222,128,.12);border-color:var(--green);color:var(--green)}
+.set-num{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;line-height:1}
+.set-check{font-size:16px;display:none}
+.set-btn.done .set-num{display:none}
+.set-btn.done .set-check{display:block}
+.set-reps-label{font-size:10px;color:var(--muted);font-weight:500}
+.set-btn.done .set-reps-label{color:var(--green);opacity:.7}
+
+/* TIMER */
+#timer-overlay{position:fixed;inset:0;background:rgba(13,13,15,.97);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:999;padding-top:var(--safe-top);padding-bottom:var(--safe-bottom)}
+#timer-overlay.show{display:flex}
+.timer-label{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:4px;color:var(--orange);text-transform:uppercase;margin-bottom:12px}
+.timer-ring-wrap{position:relative;width:220px;height:220px;margin:8px 0}
+.timer-ring-wrap svg{transform:rotate(-90deg);position:absolute;top:0;left:0}
+#timer-ring-bg{stroke:var(--dark3)}
+#timer-ring-fill{stroke:var(--orange);stroke-linecap:round;transition:stroke-dashoffset 1s linear}
+.timer-time{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.timer-seconds{font-family:'Barlow Condensed',sans-serif;font-size:72px;font-weight:900;line-height:1;color:var(--text)}
+.timer-unit{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:2px}
+.timer-ex-name{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;text-transform:uppercase;color:var(--text);margin-top:16px;text-align:center;padding:0 24px}
+.timer-next{font-size:13px;color:var(--muted);margin-top:6px}
+.timer-actions{display:flex;gap:12px;margin-top:32px}
+.timer-skip{background:var(--dark3);color:var(--muted);border:none;border-radius:14px;padding:14px 24px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer}
+.timer-skip:active{background:var(--dark4)}
+.timer-done{background:var(--orange);color:white;border:none;border-radius:14px;padding:14px 32px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer}
+.timer-done:active{background:var(--orange2)}
+
+/* COMPLETE */
+#complete{align-items:center;justify-content:center;background:var(--dark);padding:32px;text-align:center}
+.complete-emoji{font-size:72px;margin-bottom:16px}
+.complete-title{font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:900;text-transform:uppercase;color:var(--orange);line-height:1;margin-bottom:8px}
+.complete-sub{font-size:16px;color:var(--muted);margin-bottom:32px;line-height:1.5}
+.complete-stats{display:flex;gap:16px;margin-bottom:40px;width:100%}
+.stat-box{flex:1;background:var(--dark3);border-radius:16px;padding:16px}
+.stat-val{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;color:var(--orange)}
+.stat-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+.complete-btn{background:var(--orange);color:white;border:none;border-radius:16px;padding:18px 48px;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer}
+.complete-btn:active{background:var(--orange2)}
+::-webkit-scrollbar{width:0}
+
+/* ══ EXERCISE ANIMATIONS ══ */
+
+/* Shared figure parts */
+.fig { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.body-stroke { stroke: #F0EEE8; }
+.accent-stroke { stroke: #E8591A; }
+.equip { fill: #28282E; stroke: #555; stroke-width: 1.5; }
+.floor { stroke: #444; stroke-width: 2; }
+
+/* SQUAT */
+.squat-body { transform-origin: 100px 55px; animation: squat-down 2s ease-in-out infinite; }
+@keyframes squat-down {
+  0%,100% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(22px) scaleY(0.82); }
+}
+.squat-bar { animation: squat-bar 2s ease-in-out infinite; }
+@keyframes squat-bar {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(22px); }
+}
+.squat-leg-l { transform-origin: 96px 80px; animation: squat-leg-l 2s ease-in-out infinite; }
+@keyframes squat-leg-l {
+  0%,100% { transform: rotate(0deg); }
+  50% { transform: rotate(28deg); }
+}
+.squat-leg-r { transform-origin: 104px 80px; animation: squat-leg-r 2s ease-in-out infinite; }
+@keyframes squat-leg-r {
+  0%,100% { transform: rotate(0deg); }
+  50% { transform: rotate(-28deg); }
+}
+
+/* BENCH PRESS */
+.bench-arms { transform-origin: 100px 60px; animation: bench-press 2s ease-in-out infinite; }
+@keyframes bench-press {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(18px); }
+}
+.bench-bar { animation: bench-bar 2s ease-in-out infinite; }
+@keyframes bench-bar {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(18px); }
+}
+
+/* DEADLIFT */
+.dl-torso { transform-origin: 100px 75px; animation: dl-torso 2.5s ease-in-out infinite; }
+@keyframes dl-torso {
+  0%,100% { transform: rotate(-35deg); }
+  50% { transform: rotate(0deg); }
+}
+.dl-bar { animation: dl-bar 2.5s ease-in-out infinite; }
+@keyframes dl-bar {
+  0%,100% { transform: translateY(18px); }
+  50% { transform: translateY(0); }
+}
+
+/* PULL DOWN */
+.pd-arms { transform-origin: 100px 55px; animation: pd-arms 2s ease-in-out infinite; }
+@keyframes pd-arms {
+  0%,100% { transform: rotate(0deg) scaleX(1); }
+  50% { transform: rotate(15deg) scaleX(0.85); }
+}
+.pd-bar { animation: pd-bar 2s ease-in-out infinite; }
+@keyframes pd-bar {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(22px); }
+}
+
+/* SHOULDER PRESS */
+.sp-arms { transform-origin: 100px 65px; animation: sp-arms 2s ease-in-out infinite; }
+@keyframes sp-arms {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-18px); }
+}
+.sp-db { animation: sp-db 2s ease-in-out infinite; }
+@keyframes sp-db {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-18px); }
+}
+
+/* CURL */
+.curl-arm { transform-origin: 112px 75px; animation: curl-arm 2s ease-in-out infinite; }
+@keyframes curl-arm {
+  0%,100% { transform: rotate(0deg); }
+  50% { transform: rotate(-70deg); }
+}
+.curl-db { transform-origin: 112px 75px; animation: curl-db 2s ease-in-out infinite; }
+@keyframes curl-db {
+  0%,100% { transform: rotate(0deg); }
+  50% { transform: rotate(-70deg); }
+}
+
+/* TRICEP PUSHDOWN */
+.tri-arms { transform-origin: 100px 65px; animation: tri-arms 1.8s ease-in-out infinite; }
+@keyframes tri-arms {
+  0%,100% { transform: rotate(0deg); }
+  50% { transform: rotate(35deg); }
+}
+.tri-rope { animation: tri-rope 1.8s ease-in-out infinite; }
+@keyframes tri-rope {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(20px); }
+}
+
+/* LEG PRESS */
+.lp-legs { transform-origin: 75px 85px; animation: lp-legs 2s ease-in-out infinite; }
+@keyframes lp-legs {
+  0%,100% { transform: rotate(0deg); }
+  50% { transform: rotate(-30deg); }
+}
+.lp-plate { animation: lp-plate 2s ease-in-out infinite; }
+@keyframes lp-plate {
+  0%,100% { transform: translateX(0); }
+  50% { transform: translateX(-22px); }
+}
+
+/* HIP THRUST */
+.ht-hips { transform-origin: 90px 85px; animation: ht-hips 2s ease-in-out infinite; }
+@keyframes ht-hips {
+  0%,100% { transform: translateY(20px) rotate(10deg); }
+  50% { transform: translateY(0px) rotate(-5deg); }
+}
+.ht-bar { animation: ht-bar 2s ease-in-out infinite; }
+@keyframes ht-bar {
+  0%,100% { transform: translateY(20px); }
+  50% { transform: translateY(0); }
+}
+
+/* LEG CURL */
+.lc-lower { transform-origin: 85px 85px; animation: lc-lower 1.8s ease-in-out infinite; }
+@keyframes lc-lower {
+  0%,100% { transform: rotate(0deg); }
+  50% { transform: rotate(-65deg); }
+}
+
+/* PLANK */
+.pl-body { animation: plank-shake 3s ease-in-out infinite; }
+@keyframes plank-shake {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* CRUNCH */
+.cr-torso { transform-origin: 85px 80px; animation: crunch 2s ease-in-out infinite; }
+@keyframes crunch {
+  0%,100% { transform: rotate(0deg); }
+  50% { transform: rotate(-30deg); }
+}
+
+/* RUSSIAN TWIST */
+.rt-torso { transform-origin: 100px 75px; animation: rt-twist 2s ease-in-out infinite; }
+@keyframes rt-twist {
+  0%,100% { transform: rotate(-25deg); }
+  50% { transform: rotate(25deg); }
+}
+.rt-weight { transform-origin: 100px 75px; animation: rt-weight 2s ease-in-out infinite; }
+@keyframes rt-weight {
+  0%,100% { transform: rotate(-25deg) translateX(-20px); }
+  50% { transform: rotate(25deg) translateX(-20px); }
+}
+
+/* LUNGE */
+.lu-body { animation: lunge-dip 2s ease-in-out infinite; }
+@keyframes lunge-dip {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(10px); }
+}
+
+/* PUSHUP */
+.pu-body { transform-origin: 100px 90px; animation: pushup 2s ease-in-out infinite; }
+@keyframes pushup {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(16px) rotate(3deg); }
+}
+
+/* FACE PULL */
+.fp-arms { transform-origin: 100px 65px; animation: face-pull 2s ease-in-out infinite; }
+@keyframes face-pull {
+  0%,100% { transform: scaleX(1.3); }
+  50% { transform: scaleX(0.9); }
+}
+
+/* VELO */
+.wheel-spin { animation: spin 1.2s linear infinite; transform-origin: 50% 50%; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.pedal-spin { animation: spin 1.2s linear infinite; transform-origin: 106px 78px; }
+.leg-pedal-f { transform-origin: 86px 65px; animation: pedal-f 1.2s linear infinite; }
+@keyframes pedal-f { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+/* STRETCH QUAD */
+.sq-leg { transform-origin: 90px 70px; animation: strq 3s ease-in-out infinite; }
+@keyframes strq {
+  0%,100% { transform: rotate(-60deg); }
+  50% { transform: rotate(-80deg); }
+}
+
+/* STRETCH HAMSTRING */
+.sh-torso { transform-origin: 80px 70px; animation: strh 3s ease-in-out infinite; }
+@keyframes strh {
+  0%,100% { transform: rotate(-30deg); }
+  50% { transform: rotate(-55deg); }
+}
+
+/* STRETCH CHEST */
+.sc-arm { transform-origin: 120px 65px; animation: strc 3s ease-in-out infinite; }
+@keyframes strc {
+  0%,100% { transform: rotate(-10deg); }
+  50% { transform: rotate(10deg); }
+}
+
+/* BREATHING */
+.breath-circle { animation: breathe 4s ease-in-out infinite; transform-origin: 100px 90px; }
+@keyframes breathe {
+  0%,100% { transform: scale(1); opacity:.6; }
+  50% { transform: scale(1.3); opacity:1; }
+}
+.breath-circle2 { animation: breathe 4s ease-in-out infinite .5s; transform-origin: 100px 90px; }
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div class="screen active" id="home">
+  <div class="home-header">
+    <div class="home-logo">FitnessPark</div>
+    <div class="home-title">MA <span>SÉANCE</span></div>
+    <div class="home-subtitle">Full Body · Intermédiaire · 1h15</div>
+  </div>
+  <div class="progress-ring-wrap">
+    <svg width="160" height="160" viewBox="0 0 160 160">
+      <circle cx="80" cy="80" r="68" fill="none" stroke="#1E1E22" stroke-width="10"/>
+      <circle id="global-ring" cx="80" cy="80" r="68" fill="none" stroke="#E8591A" stroke-width="10" stroke-linecap="round" stroke-dasharray="427.25" stroke-dashoffset="427.25"/>
+    </svg>
+    <div class="ring-label">
+      <div class="ring-pct" id="global-pct">0%</div>
+      <div class="ring-sub">complété</div>
+    </div>
+  </div>
+  <div class="phase-cards" id="phase-cards"></div>
+  <button class="start-btn" id="resume-btn" onclick="resumeWorkout()">▶ COMMENCER</button>
+  <button class="reset-btn" onclick="confirmReset()">↺ Remettre à zéro</button>
+</div>
+
+<!-- WORKOUT -->
+<div class="screen" id="workout">
+  <div class="workout-header">
+    <div class="workout-nav">
+      <button class="back-btn" onclick="goHome()">‹</button>
+      <div class="workout-phase-name" id="workout-phase-name">Échauffement</div>
+      <div class="workout-phase-badge" id="workout-phase-badge">1/5</div>
+    </div>
+    <div class="overall-progress-bar">
+      <div class="overall-progress-fill" id="workout-progress" style="width:0%"></div>
+    </div>
+  </div>
+  <div class="exercises-list" id="exercises-list"></div>
+</div>
+
+<!-- TIMER -->
+<div id="timer-overlay">
+  <div class="timer-label">⏱ TEMPS DE REPOS</div>
+  <div class="timer-ring-wrap">
+    <svg width="220" height="220" viewBox="0 0 220 220">
+      <circle id="timer-ring-bg" cx="110" cy="110" r="98" fill="none" stroke-width="8"/>
+      <circle id="timer-ring-fill" cx="110" cy="110" r="98" fill="none" stroke-width="8" stroke-dasharray="615.75" stroke-dashoffset="0"/>
+    </svg>
+    <div class="timer-time">
+      <div class="timer-seconds" id="timer-seconds">60</div>
+      <div class="timer-unit">sec</div>
+    </div>
+  </div>
+  <div class="timer-ex-name" id="timer-ex-name"></div>
+  <div class="timer-next" id="timer-next"></div>
+  <div class="timer-actions">
+    <button class="timer-skip" onclick="skipTimer()">Passer</button>
+    <button class="timer-done" onclick="skipTimer()">✓ C'est bon</button>
+  </div>
+</div>
+
+<!-- COMPLETE -->
+<div class="screen" id="complete">
+  <div class="complete-emoji">🏆</div>
+  <div class="complete-title">Séance<br>Terminée !</div>
+  <div class="complete-sub">Excellent travail.<br>Récupère bien et reviens plus fort !</div>
+  <div class="complete-stats">
+    <div class="stat-box"><div class="stat-val" id="stat-exos">0</div><div class="stat-lbl">Exercices</div></div>
+    <div class="stat-box"><div class="stat-val" id="stat-sets">0</div><div class="stat-lbl">Séries</div></div>
+    <div class="stat-box"><div class="stat-val" id="stat-time">0</div><div class="stat-lbl">Minutes</div></div>
+  </div>
+  <button class="complete-btn" onclick="goHome()">← Retour</button>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// ANIMATED SVG DEFINITIONS (inline, 200×140)
+// ══════════════════════════════════════════
+const ANIMATIONS = {
+
+velo: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <!-- floor -->
+  <line x1="20" y1="125" x2="180" y2="125" stroke="#444" stroke-width="2"/>
+  <!-- rear wheel -->
+  <g transform="translate(55,95)">
+    <circle class="wheel-spin" cx="0" cy="0" r="28" fill="none" stroke="#555" stroke-width="3"/>
+    <line class="wheel-spin" x1="-28" y1="0" x2="28" y2="0" stroke="#444" stroke-width="1.5"/>
+    <line class="wheel-spin" x1="0" y1="-28" x2="0" y2="28" stroke="#444" stroke-width="1.5"/>
+    <circle cx="0" cy="0" r="5" fill="#E8591A"/>
+  </g>
+  <!-- front wheel -->
+  <g transform="translate(145,95)">
+    <circle class="wheel-spin" cx="0" cy="0" r="28" fill="none" stroke="#555" stroke-width="3"/>
+    <line class="wheel-spin" x1="-28" y1="0" x2="28" y2="0" stroke="#444" stroke-width="1.5"/>
+    <line class="wheel-spin" x1="0" y1="-28" x2="0" y2="28" stroke="#444" stroke-width="1.5"/>
+    <circle cx="0" cy="0" r="5" fill="#E8591A"/>
+  </g>
+  <!-- frame -->
+  <line x1="55" y1="95" x2="100" y2="65" stroke="#888" stroke-width="3" stroke-linecap="round"/>
+  <line x1="100" y1="65" x2="145" y2="95" stroke="#888" stroke-width="3" stroke-linecap="round"/>
+  <line x1="100" y1="65" x2="100" y2="45" stroke="#888" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="85" y1="95" x2="100" y2="65" stroke="#666" stroke-width="2" stroke-linecap="round"/>
+  <!-- handlebar -->
+  <line x1="138" y1="45" x2="152" y2="45" stroke="#aaa" stroke-width="3" stroke-linecap="round"/>
+  <line x1="145" y1="45" x2="145" y2="58" stroke="#aaa" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- seat -->
+  <line x1="94" y1="38" x2="112" y2="38" stroke="#aaa" stroke-width="4" stroke-linecap="round"/>
+  <line x1="100" y1="38" x2="100" y2="45" stroke="#888" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- rider head -->
+  <circle cx="135" cy="30" r="9" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+  <!-- rider body -->
+  <line x1="135" y1="39" x2="120" y2="55" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+  <!-- rider arms -->
+  <line x1="120" y1="55" x2="140" y2="50" stroke="#F0EEE8" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- pedal group animated -->
+  <g class="pedal-spin">
+    <circle cx="100" cy="80" r="8" fill="none" stroke="#E8591A" stroke-width="2"/>
+    <line x1="100" y1="72" x2="100" y2="88" stroke="#E8591A" stroke-width="2"/>
+    <rect x="94" y="69" width="12" height="5" rx="2" fill="#555"/>
+    <rect x="94" y="84" width="12" height="5" rx="2" fill="#555"/>
+  </g>
+  <!-- legs cycling -->
+  <g class="leg-pedal-f">
+    <line x1="120" y1="55" x2="100" y2="72" stroke="#F0EEE8" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="100" y1="72" x2="95" y2="88" stroke="#F0EEE8" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+</svg>`,
+
+rotation: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <line x1="20" y1="128" x2="180" y2="128" stroke="#444" stroke-width="2"/>
+  <!-- standing figure with rotating arms -->
+  <!-- legs static -->
+  <line x1="100" y1="95" x2="88" y2="128" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+  <line x1="100" y1="95" x2="112" y2="128" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+  <!-- torso -->
+  <line x1="100" y1="60" x2="100" y2="95" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- head -->
+  <circle cx="100" cy="50" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+  <!-- rotating arms group -->
+  <g style="transform-origin:100px 75px;animation:rt-torso 2s ease-in-out infinite">
+    <line x1="60" y1="75" x2="140" y2="75" stroke="#E8591A" stroke-width="3.5" stroke-linecap="round"/>
+    <circle cx="57" cy="75" r="6" fill="#E8591A"/>
+    <circle cx="143" cy="75" r="6" fill="#E8591A"/>
+  </g>
+  <!-- arc indicators -->
+  <path d="M 65 55 A 40 40 0 0 1 135 55" fill="none" stroke="#444" stroke-width="1.5" stroke-dasharray="4,3"/>
+</svg>`,
+
+fente: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <line x1="20" y1="128" x2="180" y2="128" stroke="#444" stroke-width="2"/>
+  <g class="lu-body">
+    <!-- head -->
+    <circle cx="95" cy="30" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+    <!-- torso upright -->
+    <line x1="95" y1="40" x2="95" y2="75" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+    <!-- arms out slightly -->
+    <line x1="95" y1="55" x2="72" y2="65" stroke="#F0EEE8" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="95" y1="55" x2="118" y2="65" stroke="#F0EEE8" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- front leg bent -->
+    <line x1="95" y1="75" x2="70" y2="100" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="70" y1="100" x2="55" y2="128" stroke="#E8591A" stroke-width="3.5" stroke-linecap="round"/>
+    <!-- back leg -->
+    <line x1="95" y1="75" x2="130" y2="95" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="130" y1="95" x2="145" y2="128" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+    <!-- knee dot -->
+    <circle cx="70" cy="100" r="4" fill="#E8591A"/>
+    <!-- back knee on floor -->
+    <circle cx="130" cy="95" r="4" fill="#555"/>
+  </g>
+</svg>`,
+
+pompe: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <line x1="20" y1="118" x2="180" y2="118" stroke="#444" stroke-width="2"/>
+  <g class="pu-body">
+    <!-- head -->
+    <circle cx="158" cy="68" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+    <!-- body plank -->
+    <line x1="148" y1="74" x2="55" y2="90" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+    <!-- arms (push up position) -->
+    <line x1="138" y1="76" x2="125" y2="95" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="125" y1="95" x2="125" y2="110" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="110" y1="79" x2="100" y2="98" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="100" y1="98" x2="100" y2="113" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <!-- feet -->
+    <line x1="55" y1="90" x2="42" y2="118" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="55" y1="90" x2="52" y2="118" stroke="#F0EEE8" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- direction arrow -->
+    <path d="M 130 55 L 130 45 M 126 48 L 130 44 L 134 48" fill="none" stroke="#E8591A" stroke-width="2" stroke-linecap="round" style="animation:bench-bar 2s ease-in-out infinite"/>
+  </g>
+</svg>`,
+
+face_pull: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <line x1="20" y1="128" x2="180" y2="128" stroke="#444" stroke-width="2"/>
+  <!-- cable machine anchor -->
+  <rect x="165" y="30" width="15" height="80" rx="4" fill="#28282E" stroke="#555" stroke-width="1.5"/>
+  <circle cx="168" cy="55" r="5" fill="#E8591A"/>
+  <!-- cable -->
+  <line x1="168" y1="55" x2="138" y2="65" stroke="#E8591A" stroke-width="2" stroke-dasharray="4,2" style="animation:face-pull 2s ease-in-out infinite"/>
+  <line x1="168" y1="55" x2="138" y2="72" stroke="#E8591A" stroke-width="2" stroke-dasharray="4,2" style="animation:face-pull 2s ease-in-out infinite"/>
+  <!-- figure -->
+  <circle cx="75" cy="38" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+  <line x1="75" y1="48" x2="75" y2="82" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="75" y1="82" x2="62" y2="128" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+  <line x1="75" y1="82" x2="88" y2="128" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+  <!-- arms pulling -->
+  <g class="fp-arms">
+    <line x1="75" y1="62" x2="110" y2="55" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="75" y1="62" x2="110" y2="70" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="110" y1="55" x2="138" y2="65" stroke="#F0EEE8" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="110" y1="70" x2="138" y2="72" stroke="#F0EEE8" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+</svg>`,
+
+squat: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <line x1="20" y1="128" x2="180" y2="128" stroke="#444" stroke-width="2"/>
+  <!-- squat rack posts -->
+  <rect x="22" y="25" width="8" height="100" rx="3" fill="#28282E" stroke="#555" stroke-width="1.5"/>
+  <rect x="170" y="25" width="8" height="100" rx="3" fill="#28282E" stroke="#555" stroke-width="1.5"/>
+  <!-- animated barbell -->
+  <g class="squat-bar">
+    <rect x="30" y="47" width="140" height="7" rx="3.5" fill="#E8591A"/>
+    <rect x="22" y="42" width="12" height="17" rx="3" fill="#555"/>
+    <rect x="166" y="42" width="12" height="17" rx="3" fill="#555"/>
+  </g>
+  <!-- animated body -->
+  <g class="squat-body">
+    <circle cx="100" cy="35" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+    <line x1="100" y1="45" x2="100" y2="80" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+    <line x1="100" y1="58" x2="78" y2="68" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="100" y1="58" x2="122" y2="68" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <!-- animated legs -->
+  <g class="squat-leg-l">
+    <line x1="96" y1="80" x2="80" y2="115" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="80" y1="115" x2="72" y2="128" stroke="#E8591A" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <g class="squat-leg-r">
+    <line x1="104" y1="80" x2="120" y2="115" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="120" y1="115" x2="128" y2="128" stroke="#E8591A" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <!-- depth arrow -->
+  <path d="M 155 85 L 155 110 M 151 106 L 155 111 L 159 106" fill="none" stroke="#E8591A" stroke-width="2" stroke-linecap="round" opacity=".7"/>
+</svg>`,
+
+developpe_couche: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <!-- bench -->
+  <rect x="30" y="90" width="140" height="12" rx="4" fill="#28282E" stroke="#555" stroke-width="1.5"/>
+  <line x1="50" y1="102" x2="50" y2="120" stroke="#555" stroke-width="3" stroke-linecap="round"/>
+  <line x1="150" y1="102" x2="150" y2="120" stroke="#555" stroke-width="3" stroke-linecap="round"/>
+  <line x1="40" y1="120" x2="60" y2="120" stroke="#555" stroke-width="3" stroke-linecap="round"/>
+  <line x1="140" y1="120" x2="160" y2="120" stroke="#555" stroke-width="3" stroke-linecap="round"/>
+  <!-- rack -->
+  <rect x="148" y="30" width="8" height="65" rx="3" fill="#28282E" stroke="#555" stroke-width="1.5"/>
+  <!-- animated barbell -->
+  <g class="bench-bar">
+    <rect x="40" y="45" width="120" height="7" rx="3.5" fill="#E8591A"/>
+    <rect x="33" y="40" width="14" height="17" rx="3" fill="#555"/>
+    <rect x="153" y="40" width="14" height="17" rx="3" fill="#555"/>
+  </g>
+  <!-- body lying -->
+  <circle cx="155" cy="78" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+  <line x1="144" y1="82" x2="55" y2="88" stroke="#F0EEE8" stroke-width="5" stroke-linecap="round"/>
+  <line x1="55" y1="88" x2="42" y2="115" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="62" y1="88" x2="68" y2="115" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- animated arms -->
+  <g class="bench-arms">
+    <line x1="130" y1="83" x2="118" y2="52" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="110" y1="84" x2="98" y2="52" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>`,
+
+souleve_terre: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <line x1="20" y1="128" x2="180" y2="128" stroke="#444" stroke-width="2"/>
+  <!-- barbell on floor -->
+  <g class="dl-bar">
+    <rect x="35" y="110" width="130" height="7" rx="3.5" fill="#E8591A"/>
+    <rect x="28" y="100" width="15" height="25" rx="4" fill="#555"/>
+    <rect x="157" y="100" width="15" height="25" rx="4" fill="#555"/>
+    <circle cx="36" cy="113" r="12" fill="none" stroke="#666" stroke-width="2"/>
+    <circle cx="164" cy="113" r="12" fill="none" stroke="#666" stroke-width="2"/>
+  </g>
+  <!-- animated torso hinge -->
+  <g class="dl-torso">
+    <circle cx="100" cy="28" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+    <line x1="100" y1="38" x2="100" y2="75" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+    <line x1="100" y1="55" x2="78" y2="62" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="100" y1="55" x2="122" y2="62" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <!-- hands reach bar -->
+    <line x1="78" y1="62" x2="75" y2="110" stroke="#E8591A" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="122" y1="62" x2="125" y2="110" stroke="#E8591A" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+  <!-- legs stay relatively static -->
+  <line x1="100" y1="75" x2="85" y2="128" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="100" y1="75" x2="115" y2="128" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+</svg>`,
+
+tirage_vertical: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <!-- cable machine top -->
+  <rect x="20" y="10" width="160" height="10" rx="3" fill="#28282E" stroke="#555" stroke-width="1.5"/>
+  <circle cx="100" cy="15" r="6" fill="#E8591A"/>
+  <!-- cables animated -->
+  <g class="pd-bar">
+    <line x1="100" y1="20" x2="65" y2="48" stroke="#E8591A" stroke-width="2" stroke-dasharray="3,2"/>
+    <line x1="100" y1="20" x2="135" y2="48" stroke="#E8591A" stroke-width="2" stroke-dasharray="3,2"/>
+    <rect x="55" y="45" width="90" height="7" rx="3.5" fill="#E8591A"/>
+  </g>
+  <!-- seat -->
+  <rect x="70" y="105" width="60" height="10" rx="3" fill="#28282E" stroke="#555" stroke-width="1.5"/>
+  <line x1="80" y1="115" x2="78" y2="130" stroke="#555" stroke-width="3" stroke-linecap="round"/>
+  <line x1="120" y1="115" x2="122" y2="130" stroke="#555" stroke-width="3" stroke-linecap="round"/>
+  <!-- figure sitting -->
+  <circle cx="100" cy="68" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+  <line x1="100" y1="78" x2="100" y2="105" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+  <line x1="100" y1="105" x2="82" y2="128" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+  <line x1="100" y1="105" x2="118" y2="128" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+  <!-- animated arms reaching up then pulling -->
+  <g class="pd-arms">
+    <line x1="100" y1="82" x2="65" y2="52" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="100" y1="82" x2="135" y2="52" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>`,
+
+developpe_epaules: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <line x1="20" y1="128" x2="180" y2="128" stroke="#444" stroke-width="2"/>
+  <!-- bench/seat -->
+  <rect x="75" y="100" width="50" height="10" rx="3" fill="#28282E" stroke="#555" stroke-width="1.5"/>
+  <line x1="85" y1="110" x2="85" y2="128" stroke="#555" stroke-width="3" stroke-linecap="round"/>
+  <line x1="115" y1="110" x2="115" y2="128" stroke="#555" stroke-width="3" stroke-linecap="round"/>
+  <!-- figure -->
+  <circle cx="100" cy="45" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+  <line x1="100" y1="55" x2="100" y2="100" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+  <!-- animated arms + dumbbells -->
+  <g class="sp-arms">
+    <line x1="100" y1="70" x2="68" y2="82" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="100" y1="70" x2="132" y2="82" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <g class="sp-db">
+    <rect x="55" y="78" width="16" height="7" rx="3" fill="#E8591A"/>
+    <rect x="129" y="78" width="16" height="7" rx="3" fill="#E8591A"/>
+    <rect x="50" y="76" width="7" height="11" rx="2" fill="#555"/>
+    <rect x="71" y="76" width="7" height="11" rx="2" fill="#555"/>
+    <rect x="123" y="76" width="7" height="11" rx="2" fill="#555"/>
+    <rect x="144" y="76" width="7" height="11" rx="2" fill="#555"/>
+  </g>
+  <!-- thighs -->
+  <line x1="100" y1="100" x2="78" y2="128" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="100" y1="100" x2="122" y2="128" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- up arrow -->
+  <path d="M 150 65 L 150 40 M 146 44 L 150 39 L 154 44" fill="none" stroke="#E8591A" stroke-width="2" stroke-linecap="round" style="animation:sp-arms 2s ease-in-out infinite"/>
+</svg>`,
+
+curl_biceps: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <line x1="20" y1="128" x2="180" y2="128" stroke="#444" stroke-width="2"/>
+  <!-- figure standing -->
+  <circle cx="90" cy="30" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+  <line x1="90" y1="40" x2="90" y2="85" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+  <line x1="90" y1="85" x2="75" y2="128" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="90" y1="85" x2="105" y2="128" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- static left arm -->
+  <line x1="90" y1="58" x2="68" y2="70" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+  <line x1="68" y1="70" x2="62" y2="100" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+  <rect x="55" y="96" width="14" height="6" rx="3" fill="#555"/>
+  <rect x="50" y="94" width="5" height="10" rx="2" fill="#E8591A"/>
+  <rect x="69" y="94" width="5" height="10" rx="2" fill="#E8591A"/>
+  <!-- animated right arm curling -->
+  <g class="curl-arm">
+    <line x1="90" y1="58" x2="112" y2="68" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="112" y1="68" x2="118" y2="98" stroke="#E8591A" stroke-width="3.5" stroke-linecap="round"/>
+  </g>
+  <g class="curl-db">
+    <rect x="111" y="94" width="14" height="6" rx="3" fill="#555"/>
+    <rect x="106" y="92" width="5" height="10" rx="2" fill="#E8591A"/>
+    <rect x="125" y="92" width="5" height="10" rx="2" fill="#E8591A"/>
+  </g>
+</svg>`,
+
+triceps_poulie: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <line x1="20" y1="128" x2="180" y2="128" stroke="#444" stroke-width="2"/>
+  <!-- cable machine -->
+  <rect x="160" y="10" width="20" height="100" rx="4" fill="#28282E" stroke="#555" stroke-width="1.5"/>
+  <circle cx="163" cy="30" r="6" fill="#E8591A"/>
+  <!-- cable + rope animated -->
+  <g class="tri-rope">
+    <line x1="163" y1="30" x2="118" y2="52" stroke="#E8591A" stroke-width="2" stroke-dasharray="3,2"/>
+    <line x1="163" y1="30" x2="122" y2="55" stroke="#E8591A" stroke-width="2" stroke-dasharray="3,2"/>
+    <!-- rope handles -->
+    <path d="M 115 50 Q 105 58 115 65" fill="none" stroke="#E8591A" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <!-- figure -->
+  <circle cx="90" cy="28" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+  <line x1="90" y1="38" x2="90" y2="82" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+  <line x1="90" y1="82" x2="76" y2="128" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="90" y1="82" x2="104" y2="128" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- animated arms pushing down -->
+  <g class="tri-arms">
+    <line x1="90" y1="55" x2="108" y2="52" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="108" y1="52" x2="115" y2="58" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="90" y1="55" x2="72" y2="52" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="72" y1="52" x2="65" y2="58" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>`,
+
+leg_press: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <!-- machine seat back -->
+  <rect x="15" y="50" width="50" height="70" rx="6" fill="#1E1E22" stroke="#444" stroke-width="1.5"/>
+  <!-- seat -->
+  <rect x="55" y="90" width="45" height="20" rx="4" fill="#28282E" stroke="#555" stroke-width="1.5"/>
+  <!-- inclined plate rail -->
+  <line x1="65" y1="70" x2="175" y2="20" stroke="#555" stroke-width="3" stroke-linecap="round"/>
+  <line x1="65" y1="85" x2="175" y2="35" stroke="#555" stroke-width="3" stroke-linecap="round"/>
+  <!-- animated plate -->
+  <g class="lp-plate">
+    <rect x="148" y="18" width="25" height="20" rx="3" fill="#28282E" stroke="#666" stroke-width="1.5"/>
+    <rect x="153" y="14" width="8" height="28" rx="2" fill="#E8591A"/>
+    <rect x="164" y="14" width="8" height="28" rx="2" fill="#E8591A"/>
+  </g>
+  <!-- figure reclining -->
+  <circle cx="35" cy="45" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+  <line x1="35" y1="55" x2="52" y2="88" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+  <!-- animated legs pressing -->
+  <g class="lp-legs">
+    <line x1="55" y1="95" x2="100" y2="75" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="100" y1="75" x2="148" y2="58" stroke="#E8591A" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="55" y1="105" x2="100" y2="88" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="100" y1="88" x2="148" y2="72" stroke="#E8591A" stroke-width="3.5" stroke-linecap="round"/>
+    <!-- foot plates -->
+    <circle cx="148" cy="58" r="5" fill="#555"/>
+    <circle cx="148" cy="72" r="5" fill="#555"/>
+  </g>
+</svg>`,
+
+hip_thrust: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <line x1="20" y1="128" x2="180" y2="128" stroke="#444" stroke-width="2"/>
+  <!-- bench behind -->
+  <rect x="18" y="72" width="55" height="16" rx="5" fill="#28282E" stroke="#555" stroke-width="1.5"/>
+  <line x1="25" y1="88" x2="23" y2="115" stroke="#555" stroke-width="3" stroke-linecap="round"/>
+  <line x1="65" y1="88" x2="63" y2="115" stroke="#555" stroke-width="3" stroke-linecap="round"/>
+  <!-- animated body bridge -->
+  <g class="ht-hips">
+    <circle cx="45" cy="62" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+    <line x1="45" y1="72" x2="55" y2="80" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+    <!-- torso on bench -->
+    <line x1="33" y1="80" x2="55" y2="80" stroke="#F0EEE8" stroke-width="5" stroke-linecap="round"/>
+    <!-- upper body resting -->
+    <line x1="33" y1="80" x2="20" y2="80" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+    <!-- hips up -->
+    <line x1="55" y1="80" x2="90" y2="65" stroke="#F0EEE8" stroke-width="5" stroke-linecap="round"/>
+    <!-- barbell animated -->
+  </g>
+  <g class="ht-bar">
+    <rect x="62" y="56" width="110" height="8" rx="4" fill="#E8591A"/>
+    <rect x="55" y="50" width="12" height="20" rx="3" fill="#555"/>
+    <rect x="165" y="50" width="12" height="20" rx="3" fill="#555"/>
+  </g>
+  <!-- legs static to floor -->
+  <line x1="90" y1="65" x2="110" y2="95" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+  <line x1="110" y1="95" x2="115" y2="128" stroke="#E8591A" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="90" y1="65" x2="140" y2="85" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+  <line x1="140" y1="85" x2="155" y2="128" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- glute arrow -->
+  <path d="M 88 50 L 88 38 M 84 42 L 88 37 L 92 42" fill="none" stroke="#E8591A" stroke-width="2" stroke-linecap="round"/>
+</svg>`,
+
+leg_curl: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <!-- machine bench -->
+  <rect x="20" y="55" width="130" height="22" rx="5" fill="#1E1E22" stroke="#444" stroke-width="1.5"/>
+  <line x1="35" y1="77" x2="32" y2="100" stroke="#555" stroke-width="3" stroke-linecap="round"/>
+  <line x1="130" y1="77" x2="128" y2="100" stroke="#555" stroke-width="3" stroke-linecap="round"/>
+  <!-- roller at end -->
+  <circle cx="155" cy="85" r="12" fill="#28282E" stroke="#555" stroke-width="2"/>
+  <circle cx="155" cy="85" r="5" fill="#E8591A"/>
+  <!-- figure prone (face down) -->
+  <circle cx="42" cy="44" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+  <line x1="42" y1="54" x2="100" y2="55" stroke="#F0EEE8" stroke-width="5" stroke-linecap="round"/>
+  <!-- arms hang down -->
+  <line x1="55" y1="55" x2="48" y2="75" stroke="#F0EEE8" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="72" y1="55" x2="68" y2="78" stroke="#F0EEE8" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- static upper legs -->
+  <line x1="100" y1="55" x2="140" y2="60" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+  <line x1="100" y1="65" x2="140" y2="70" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+  <!-- animated lower legs curling -->
+  <g class="lc-lower">
+    <line x1="140" y1="60" x2="155" y2="75" stroke="#E8591A" stroke-width="4" stroke-linecap="round"/>
+    <line x1="140" y1="70" x2="155" y2="82" stroke="#E8591A" stroke-width="4" stroke-linecap="round"/>
+    <!-- ankle pads -->
+    <rect x="150" y="72" width="14" height="7" rx="3" fill="#E8591A"/>
+  </g>
+</svg>`,
+
+planche: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <line x1="20" y1="118" x2="180" y2="118" stroke="#444" stroke-width="2"/>
+  <g class="pl-body">
+    <!-- head -->
+    <circle cx="162" cy="68" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+    <!-- body plank perfectly horizontal -->
+    <line x1="152" y1="73" x2="42" y2="88" stroke="#F0EEE8" stroke-width="5" stroke-linecap="round"/>
+    <!-- arms (elbow plank) -->
+    <line x1="138" y1="75" x2="128" y2="90" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="128" y1="90" x2="115" y2="110" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="120" y1="77" x2="110" y2="92" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="110" y1="92" x2="98" y2="112" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <!-- forearm line on ground -->
+    <line x1="98" y1="112" x2="118" y2="108" stroke="#E8591A" stroke-width="4" stroke-linecap="round"/>
+    <!-- feet -->
+    <line x1="42" y1="88" x2="30" y2="118" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="46" y1="88" x2="38" y2="118" stroke="#F0EEE8" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- alignment arrow -->
+    <line x1="162" y1="55" x2="30" y2="103" stroke="#E8591A" stroke-width="1" stroke-dasharray="5,4" opacity=".5"/>
+  </g>
+</svg>`,
+
+crunch_poulie: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <line x1="20" y1="128" x2="180" y2="128" stroke="#444" stroke-width="2"/>
+  <!-- cable pulley top right -->
+  <rect x="165" y="15" width="18" height="70" rx="4" fill="#28282E" stroke="#555" stroke-width="1.5"/>
+  <circle cx="168" cy="30" r="5" fill="#E8591A"/>
+  <!-- cable animated -->
+  <line x1="168" y1="30" x2="115" y2="52" stroke="#E8591A" stroke-width="2" stroke-dasharray="4,2" style="animation:tri-rope 1.8s ease-in-out infinite"/>
+  <!-- kneeling figure -->
+  <!-- knees on floor -->
+  <circle cx="80" cy="108" r="6" fill="#28282E" stroke="#555" stroke-width="2"/>
+  <circle cx="110" cy="108" r="6" fill="#28282E" stroke="#555" stroke-width="2"/>
+  <line x1="80" y1="108" x2="80" y2="128" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+  <line x1="110" y1="108" x2="110" y2="128" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+  <!-- animated torso crunch -->
+  <g class="cr-torso">
+    <circle cx="95" cy="55" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+    <line x1="95" y1="65" x2="95" y2="108" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+    <!-- arms up holding rope -->
+    <line x1="95" y1="75" x2="78" y2="62" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="78" y1="62" x2="112" y2="52" stroke="#E8591A" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="95" y1="75" x2="112" y2="62" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>`,
+
+russian_twist: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <line x1="20" y1="128" x2="180" y2="128" stroke="#444" stroke-width="2"/>
+  <!-- V-sit figure — torso rotates -->
+  <!-- feet anchored -->
+  <line x1="75" y1="105" x2="60" y2="128" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="100" y1="100" x2="90" y2="128" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="100" y1="100" x2="75" y2="105" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+  <!-- rotating torso -->
+  <g class="rt-torso">
+    <line x1="100" y1="100" x2="100" y2="62" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="100" cy="52" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+    <!-- arms extended -->
+    <line x1="100" y1="78" x2="130" y2="75" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="130" y1="75" x2="148" y2="72" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <!-- weight follows torso -->
+  <g class="rt-weight">
+    <circle cx="148" cy="72" r="12" fill="#28282E" stroke="#E8591A" stroke-width="2.5"/>
+    <line x1="142" y1="66" x2="154" y2="78" stroke="#E8591A" stroke-width="2"/>
+    <line x1="154" y1="66" x2="142" y2="78" stroke="#E8591A" stroke-width="2"/>
+  </g>
+  <!-- V indicator -->
+  <path d="M 60 128 L 95 100 L 130 128" fill="none" stroke="#E8591A" stroke-width="1.5" stroke-dasharray="4,3" opacity=".5"/>
+</svg>`,
+
+etirement_quad: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <line x1="20" y1="128" x2="180" y2="128" stroke="#444" stroke-width="2"/>
+  <!-- standing figure, one leg raised behind -->
+  <circle cx="90" cy="25" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+  <line x1="90" y1="35" x2="90" y2="75" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+  <!-- standing leg -->
+  <line x1="90" y1="75" x2="85" y2="128" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- arm holding raised leg -->
+  <line x1="90" y1="50" x2="108" y2="62" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+  <!-- raised bent leg animated -->
+  <g class="sq-leg">
+    <line x1="90" y1="75" x2="108" y2="62" stroke="#E8591A" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="108" y1="62" x2="112" y2="45" stroke="#E8591A" stroke-width="3.5" stroke-linecap="round"/>
+    <circle cx="112" cy="42" r="5" fill="#E8591A"/>
+  </g>
+  <!-- balance line -->
+  <line x1="88" y1="128" x2="92" y2="128" stroke="#E8591A" stroke-width="3" stroke-linecap="round"/>
+  <!-- muscle highlight -->
+  <path d="M 90 75 Q 100 85 105 65" fill="none" stroke="#E8591A" stroke-width="2" stroke-dasharray="3,2" opacity=".6"/>
+</svg>`,
+
+etirement_ischios: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <line x1="20" y1="118" x2="180" y2="118" stroke="#444" stroke-width="2"/>
+  <!-- seated figure reaching forward -->
+  <!-- butt on floor -->
+  <ellipse cx="60" cy="115" rx="20" ry="5" fill="#28282E" stroke="#555" stroke-width="1"/>
+  <!-- legs extended -->
+  <line x1="50" y1="112" x2="160" y2="112" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+  <line x1="55" y1="118" x2="165" y2="118" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- feet -->
+  <rect x="158" y="106" width="12" height="14" rx="5" fill="#555"/>
+  <!-- animated torso hinging forward -->
+  <g class="sh-torso">
+    <line x1="62" y1="110" x2="62" y2="68" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="62" cy="58" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+    <!-- arms reaching toward feet -->
+    <line x1="62" y1="80" x2="90" y2="88" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="90" y1="88" x2="140" y2="100" stroke="#E8591A" stroke-width="3" stroke-linecap="round"/>
+    <line x1="62" y1="80" x2="88" y2="95" stroke="#F0EEE8" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+  <!-- hamstring arc -->
+  <path d="M 55 112 Q 110 90 160 112" fill="none" stroke="#E8591A" stroke-width="1.5" stroke-dasharray="4,3" opacity=".5"/>
+</svg>`,
+
+etirement_pecto: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <line x1="20" y1="128" x2="180" y2="128" stroke="#444" stroke-width="2"/>
+  <!-- door frame / wall -->
+  <rect x="165" y="15" width="18" height="110" rx="4" fill="#1E1E22" stroke="#444" stroke-width="1.5"/>
+  <line x1="165" y1="15" x2="165" y2="125" stroke="#555" stroke-width="2"/>
+  <!-- figure -->
+  <circle cx="100" cy="32" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+  <line x1="100" y1="42" x2="100" y2="82" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+  <line x1="100" y1="82" x2="86" y2="128" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="100" y1="82" x2="114" y2="128" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- animated arm pressed against wall -->
+  <g class="sc-arm">
+    <line x1="100" y1="55" x2="140" y2="52" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="140" y1="52" x2="165" y2="60" stroke="#E8591A" stroke-width="4" stroke-linecap="round"/>
+    <!-- elbow dot -->
+    <circle cx="140" cy="52" r="5" fill="#E8591A"/>
+    <!-- hand on wall -->
+    <circle cx="165" cy="60" r="6" fill="#555"/>
+  </g>
+  <!-- torso rotates slightly away -->
+  <path d="M 100 55 Q 75 62 68 82" fill="none" stroke="#E8591A" stroke-width="1.5" stroke-dasharray="3,2" opacity=".6"/>
+  <!-- pec stretch arrow -->
+  <path d="M 85 45 L 70 45 M 74 41 L 69 45 L 74 49" fill="none" stroke="#E8591A" stroke-width="2" stroke-linecap="round"/>
+</svg>`,
+
+etirement_dos: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <line x1="20" y1="128" x2="180" y2="128" stroke="#444" stroke-width="2"/>
+  <!-- pole / bar -->
+  <rect x="18" y="30" width="10" height="95" rx="4" fill="#28282E" stroke="#555" stroke-width="1.5"/>
+  <!-- figure hanging / pulling -->
+  <g class="sh-torso" style="transform-origin:60px 75px;animation:strh 3s ease-in-out infinite">
+    <circle cx="60" cy="45" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+    <line x1="60" y1="55" x2="60" y2="90" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+    <!-- arms reaching to bar -->
+    <line x1="60" y1="65" x2="35" y2="55" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="35" y1="55" x2="28" y2="62" stroke="#E8591A" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="60" y1="65" x2="38" y2="52" stroke="#F0EEE8" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+  <!-- legs -->
+  <line x1="60" y1="90" x2="48" y2="128" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="60" y1="90" x2="72" y2="128" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- lat stretch arcs -->
+  <path d="M 40 60 Q 55 40 75 50" fill="none" stroke="#E8591A" stroke-width="1.5" stroke-dasharray="3,2" opacity=".6"/>
+  <path d="M 38 68 Q 52 50 72 60" fill="none" stroke="#E8591A" stroke-width="1" stroke-dasharray="3,2" opacity=".4"/>
+  <!-- decompression arrows -->
+  <path d="M 90 45 L 90 30 M 86 34 L 90 29 L 94 34" fill="none" stroke="#E8591A" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 90 75 L 90 90 M 86 86 L 90 91 L 94 86" fill="none" stroke="#E8591A" stroke-width="2" stroke-linecap="round"/>
+</svg>`,
+
+respiration: `<svg viewBox="0 0 200 140" width="200" height="140" xmlns="http://www.w3.org/2000/svg">
+  <!-- seated meditation figure -->
+  <line x1="20" y1="128" x2="180" y2="128" stroke="#444" stroke-width="2"/>
+  <!-- breathing circles -->
+  <circle class="breath-circle" cx="100" cy="75" r="45" fill="none" stroke="#E8591A" stroke-width="1.5" opacity=".3"/>
+  <circle class="breath-circle2" cx="100" cy="75" r="32" fill="none" stroke="#E8591A" stroke-width="2" opacity=".5"/>
+  <circle style="animation:breathe 4s ease-in-out infinite 1s;transform-origin:100px 75px" cx="100" cy="75" r="20" fill="rgba(232,89,26,0.15)" stroke="#E8591A" stroke-width="2"/>
+  <!-- figure sitting cross-legged -->
+  <circle cx="100" cy="35" r="10" fill="none" stroke="#F0EEE8" stroke-width="2.5"/>
+  <line x1="100" y1="45" x2="100" y2="80" stroke="#F0EEE8" stroke-width="4" stroke-linecap="round"/>
+  <!-- cross-legged -->
+  <path d="M 100 80 Q 78 90 65 105 Q 75 115 90 110" fill="none" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M 100 80 Q 122 90 135 105 Q 125 115 110 110" fill="none" stroke="#F0EEE8" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="65" y1="105" x2="135" y2="105" stroke="#F0EEE8" stroke-width="3" stroke-linecap="round"/>
+  <!-- arms resting on knees -->
+  <line x1="100" y1="60" x2="75" y2="75" stroke="#F0EEE8" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="100" y1="60" x2="125" y2="75" stroke="#F0EEE8" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="72" cy="76" r="5" fill="#555"/>
+  <circle cx="128" cy="76" r="5" fill="#555"/>
+  <!-- breath text -->
+  <text x="100" y="128" text-anchor="middle" fill="#7A7A85" font-size="9" font-family="'Barlow Condensed', sans-serif" letter-spacing="1">INSPIRE · RETIENS · EXPIRE</text>
+</svg>`,
+
+};
+
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+const PHASES = [
+  { id:"warmup", icon:"🔥", name:"Échauffement", color:"#FF9F43", duration:"10 min",
+    exercises:[
+      {id:"w1",icon:"🚴",name:"Vélo ou rameur",          anim:"velo",        sets:1,reps:"5 min",   rest:0, tip:"Intensité modérée, montée progressive. Objectif : transpirer légèrement."},
+      {id:"w2",icon:"🔄",name:"Rotations épaules/hanches",anim:"rotation",  sets:1,reps:"10×chaque",rest:0, tip:"Amplitude maximale, mouvement lent et contrôlé."},
+      {id:"w3",icon:"🦵",name:"Fentes dynamiques",        anim:"fente",      sets:2,reps:"10×jambe",rest:30,tip:"Genou avant à 90°, genou arrière frôle le sol. Garde le buste droit."},
+      {id:"w4",icon:"💪",name:"Pompes légères",           anim:"pompe",      sets:2,reps:"10",       rest:30,tip:"Corps gainé, coudes légèrement fléchis vers le corps."},
+      {id:"w5",icon:"🎯",name:"Face pull câble léger",    anim:"face_pull",  sets:2,reps:"15",       rest:30,tip:"Tire vers le visage, coudes hauts et écartés. Activation deltoïdes postérieurs."},
+    ]
+  },
+  { id:"force", icon:"💪", name:"Bloc A — Force", color:"#E8591A", duration:"20 min",
+    exercises:[
+      {id:"f1",icon:"🏋️",name:"Squat barre (rack)",      anim:"squat",            sets:4,reps:"8-10",rest:90,tip:"Descends jusqu'aux cuisses parallèles au sol. Dos droit, poitrine haute, genoux dans l'axe."},
+      {id:"f2",icon:"🛋️",name:"Développé couché barre",  anim:"developpe_couche", sets:4,reps:"8-10",rest:90,tip:"Omoplates serrées sur le banc. Descente contrôlée 3 sec, barre effleure le sternum."},
+      {id:"f3",icon:"⬆️",name:"Soulevé de terre roumain",anim:"souleve_terre",    sets:3,reps:"10",  rest:90,tip:"Jambes quasi-tendues, barre le long des jambes. Charnière hanches, pas de flexion lombaire."},
+    ]
+  },
+  { id:"hyper", icon:"🎯", name:"Bloc B — Hypertrophie", color:"#9B59B6", duration:"25 min",
+    exercises:[
+      {id:"h1",icon:"🏊",name:"Tirage vertical poulie",       anim:"tirage_vertical",  sets:3,reps:"10-12",rest:60,tip:"Coudes pointent vers les hanches. Étirement complet en haut, contraction maximale en bas."},
+      {id:"h2",icon:"🙆",name:"Développé épaules haltères",   anim:"developpe_epaules",sets:3,reps:"10-12",rest:60,tip:"Assis, dos soutenu. Monte jusqu'à extension complète sans verrouiller les coudes."},
+      {id:"h3",icon:"💪",name:"Curl biceps haltères alterné", anim:"curl_biceps",      sets:3,reps:"12",   rest:60,tip:"Coude fixe contre le corps, supine (tourne la paume) en haut. Descente contrôlée."},
+      {id:"h4",icon:"🔽",name:"Extension triceps poulie",     anim:"triceps_poulie",   sets:3,reps:"12",   rest:60,tip:"Coudes collés au corps et fixes. Écarte la corde en fin de mouvement, contracte les triceps."},
+      {id:"h5",icon:"🦵",name:"Leg press machine",            anim:"leg_press",        sets:3,reps:"12-15",rest:60,tip:"Pieds à largeur d'épaules. Descends sans décoller les fessiers. Ne verrouille pas les genoux en haut."},
+      {id:"h6",icon:"🍑",name:"Hip thrust barre/machine",     anim:"hip_thrust",       sets:3,reps:"12-15",rest:60,tip:"Haut du dos contre le banc, barre sur les hanches. Monte jusqu'à alignement parfait corps-sol."},
+      {id:"h7",icon:"↩️",name:"Leg curl couché machine",      anim:"leg_curl",         sets:3,reps:"12-15",rest:60,tip:"Descente lente 3 sec. Ne soulève pas les hanches pour tricher. Ischiojambiers bien ciblés."},
+    ]
+  },
+  { id:"core", icon:"🔩", name:"Bloc C — Core", color:"#3498DB", duration:"10 min",
+    exercises:[
+      {id:"c1",icon:"🪨",name:"Planche frontale (gainage)",  anim:"planche",      sets:3,reps:"40-60s",rest:45,tip:"Corps parfaitement aligné tête-talons. Contracte abdos, fessiers et quadriceps simultanément."},
+      {id:"c2",icon:"🌀",name:"Crunchs à la poulie basse",   anim:"crunch_poulie",sets:3,reps:"15",    rest:45,tip:"Agenouillé face à la poulie. Fléchis le buste vers les cuisses, pas les bras. Contraction abdominale."},
+      {id:"c3",icon:"🔀",name:"Russian Twist haltère",       anim:"russian_twist",sets:3,reps:"20 tot",rest:45,tip:"Position V assis, pieds décollés. Rotation maximale du buste, le poids suit les mains."},
+    ]
+  },
+  { id:"cool", icon:"🧘", name:"Retour au calme", color:"#1ABC9C", duration:"10 min",
+    exercises:[
+      {id:"s1",icon:"🦵",name:"Étirement quadriceps",        anim:"etirement_quad",   sets:1,reps:"30s×côté", rest:0,tip:"Debout, tiens la cheville, genou pointé vers le bas. Ressens l'étirement à l'avant de la cuisse."},
+      {id:"s2",icon:"↗️",name:"Étirement ischiojambiers",    anim:"etirement_ischios",sets:1,reps:"30s×côté", rest:0,tip:"Assis, jambe tendue. Penche le buste en avant (dos plat), pas le dos rond. Ressens l'étirement à l'arrière."},
+      {id:"s3",icon:"🤲",name:"Étirement pectoraux (mur)",   anim:"etirement_pecto",  sets:1,reps:"30s×côté", rest:0,tip:"Appuie l'avant-bras contre un mur. Tourne le corps vers l'opposé. Ouverture de la poitrine."},
+      {id:"s4",icon:"🌊",name:"Étirement dorsaux",           anim:"etirement_dos",    sets:1,reps:"30s",       rest:0,tip:"Tiens une barre basse, recule les hanches. Laisse le poids du corps étirer le dos."},
+      {id:"s5",icon:"🌬️",name:"Respiration diaphragmatique", anim:"respiration",      sets:1,reps:"10 cycles", rest:0,tip:"Inspire 4s (ventre gonfle), retiens 2s, expire 6s. Active le système parasympathique."},
+    ]
+  }
+];
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let state={}, currentPhaseIdx=0, timerInterval=null, timerRemaining=0, timerTotal=0, workoutStart=null;
+
+function defaultState(){
+  const s={};
+  PHASES.forEach(p=>p.exercises.forEach(ex=>{s[ex.id]={sets:{}};for(let i=0;i<ex.sets;i++)s[ex.id].sets[i]=false;}));
+  return s;
+}
+function saveState(){try{localStorage.setItem('fp2_state',JSON.stringify(state));localStorage.setItem('fp2_start',workoutStart?workoutStart.toString():'');}catch(e){}}
+function loadState(){try{const s=localStorage.getItem('fp2_state');state=s?JSON.parse(s):defaultState();const t=localStorage.getItem('fp2_start');workoutStart=t?parseInt(t):null;}catch(e){state=defaultState();}}
+
+function getPhaseProgress(idx){const p=PHASES[idx];let done=0,total=0;p.exercises.forEach(ex=>{total+=ex.sets;for(let i=0;i<ex.sets;i++)if(state[ex.id]?.sets[i])done++;});return{done,total};}
+function getGlobalProgress(){let d=0,t=0;PHASES.forEach((_,i)=>{const p=getPhaseProgress(i);d+=p.done;t+=p.total;});return t>0?d/t:0;}
+function isExerciseDone(id,n){for(let i=0;i<n;i++)if(!state[id]?.sets[i])return false;return true;}
+function isPhaseDone(idx){return PHASES[idx].exercises.every(ex=>isExerciseDone(ex.id,ex.sets));}
+
+// ══════════════════════════════════════════
+// HOME
+// ══════════════════════════════════════════
+function renderHome(){
+  const pct=Math.round(getGlobalProgress()*100);
+  const circ=2*Math.PI*68;
+  document.getElementById('global-ring').style.strokeDashoffset=circ*(1-pct/100);
+  document.getElementById('global-pct').textContent=pct+'%';
+  const c=document.getElementById('phase-cards');c.innerHTML='';
+  PHASES.forEach((phase,idx)=>{
+    const prog=getPhaseProgress(idx),done=isPhaseDone(idx),isActive=!done&&(idx===0||isPhaseDone(idx-1));
+    const card=document.createElement('div');
+    card.className='phase-card'+(done?' done':'')+(isActive?' active-phase':'');
+    card.style.setProperty('--phase-color',phase.color);
+    card.onclick=()=>openPhase(idx);
+    card.innerHTML=`<div class="phase-icon">${phase.icon}</div><div class="phase-info"><div class="phase-name">${phase.name}</div><div class="phase-meta">${phase.duration} · ${phase.exercises.length} exercices</div></div><div class="phase-progress"><div class="phase-count ${done?'done-count':''}">${done?'✓':prog.done+'/'+prog.total}</div><div class="phase-bar-wrap"><div class="phase-bar" style="width:${prog.total>0?Math.round(prog.done/prog.total*100):0}%"></div></div></div>`;
+    c.appendChild(card);
+  });
+  const btn=document.getElementById('resume-btn');
+  if(pct===100){btn.textContent='🏆 SÉANCE TERMINÉE !';btn.onclick=showComplete;}
+  else if(pct>0){btn.textContent='▶ REPRENDRE — '+pct+'%';btn.onclick=resumeWorkout;}
+  else{btn.textContent='▶ COMMENCER LA SÉANCE';btn.onclick=resumeWorkout;}
+}
+
+function openPhase(idx){currentPhaseIdx=idx;if(!workoutStart)workoutStart=Date.now();renderWorkout();showScreen('workout');}
+function resumeWorkout(){let t=0;for(let i=0;i<PHASES.length;i++){if(!isPhaseDone(i)){t=i;break;}t=i;}openPhase(t);}
+
+// ══════════════════════════════════════════
+// WORKOUT
+// ══════════════════════════════════════════
+function renderWorkout(){
+  const phase=PHASES[currentPhaseIdx];
+  document.getElementById('workout-phase-name').textContent=phase.icon+' '+phase.name;
+  document.getElementById('workout-phase-badge').textContent=(currentPhaseIdx+1)+'/'+PHASES.length;
+  document.getElementById('workout-progress').style.width=Math.round(getGlobalProgress()*100)+'%';
+  const list=document.getElementById('exercises-list');list.innerHTML='';
+  const firstUndone=phase.exercises.findIndex(e=>!isExerciseDone(e.id,e.sets));
+  phase.exercises.forEach((ex,exIdx)=>{
+    const done=isExerciseDone(ex.id,ex.sets);
+    const card=document.createElement('div');
+    card.className='ex-card'+(done?' completed':'');
+    card.id='ex-card-'+ex.id;
+    let setsHTML='';
+    for(let i=0;i<ex.sets;i++){
+      const isDone=state[ex.id]?.sets[i];
+      setsHTML+=`<button class="set-btn ${isDone?'done':''}" id="set-${ex.id}-${i}" onclick="toggleSet('${ex.id}',${i},${ex.sets},${ex.rest},'${ex.name.replace(/'/g,"\\'")}')"><span class="set-check">✓</span><span class="set-num">${i+1}</span><span class="set-reps-label">${ex.reps}</span></button>`;
+    }
+    const animSVG=ANIMATIONS[ex.anim]||'';
+    card.innerHTML=`
+      <div class="ex-header" onclick="toggleCard('${ex.id}')">
+        <div class="ex-icon-wrap">${ex.icon}</div>
+        <div class="ex-info">
+          <div class="ex-name">${ex.name}</div>
+          <div class="ex-meta">
+            <span class="ex-tag orange">${ex.sets} série${ex.sets>1?'s':''}</span>
+            <span class="ex-tag">${ex.reps}</span>
+            ${ex.rest>0?`<span class="ex-tag">⏱ ${ex.rest}s repos</span>`:''}
+          </div>
+        </div>
+        <span class="ex-chevron">${done?'✓':'›'}</span>
+      </div>
+      <div class="ex-body">
+        <div class="anim-container">${animSVG}<div class="anim-label">animation du mouvement</div></div>
+        <div class="ex-tip">💡 ${ex.tip}</div>
+        <div class="sets-label">Séries effectuées</div>
+        <div class="sets-grid">${setsHTML}</div>
+      </div>`;
+    if(!done&&exIdx===firstUndone)card.classList.add('open');
+    list.appendChild(card);
+  });
+}
+
+function toggleCard(id){
+  const card=document.getElementById('ex-card-'+id);if(!card)return;
+  const open=card.classList.contains('open');
+  document.querySelectorAll('.ex-card.open').forEach(c=>c.classList.remove('open'));
+  if(!open)card.classList.add('open');
+}
+
+function toggleSet(exId,setIdx,numSets,restSec,exName){
+  if(!state[exId])state[exId]={sets:{}};
+  state[exId].sets[setIdx]=!state[exId].sets[setIdx];
+  saveState();
+  const btn=document.getElementById(`set-${exId}-${setIdx}`);
+  if(btn){btn.classList.toggle('done',state[exId].sets[setIdx]);if(state[exId].sets[setIdx]&&'vibrate'in navigator)navigator.vibrate(40);}
+  const exDone=isExerciseDone(exId,numSets);
+  const card=document.getElementById('ex-card-'+exId);
+  if(card){card.classList.toggle('completed',exDone);const ch=card.querySelector('.ex-chevron');if(ch)ch.textContent=exDone?'✓':'›';}
+  document.getElementById('workout-progress').style.width=Math.round(getGlobalProgress()*100)+'%';
+  if(state[exId].sets[setIdx]&&parseInt(restSec)>0){
+    const next=setIdx+1<numSets?`Série ${setIdx+2}/${numSets} à venir`:'Dernier série terminé !';
+    startTimer(parseInt(restSec),exName,next);
+  }
+  if(isPhaseDone(currentPhaseIdx)){
+    setTimeout(()=>{if(getGlobalProgress()>=1)showComplete();else showPhaseDoneBanner();},400);
+  }
+}
+
+// ══════════════════════════════════════════
+// TIMER
+// ══════════════════════════════════════════
+function startTimer(sec,name,next){
+  timerTotal=sec;timerRemaining=sec;
+  document.getElementById('timer-ex-name').textContent=name;
+  document.getElementById('timer-next').textContent=next;
+  const circ=2*Math.PI*98;
+  document.getElementById('timer-ring-fill').style.strokeDasharray=circ;
+  updateTimerDisplay();
+  document.getElementById('timer-overlay').classList.add('show');
+  clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{
+    timerRemaining--;updateTimerDisplay();
+    if(timerRemaining<=0){clearInterval(timerInterval);if('vibrate'in navigator)navigator.vibrate([100,50,100]);setTimeout(skipTimer,600);}
+  },1000);
+}
+function updateTimerDisplay(){
+  document.getElementById('timer-seconds').textContent=timerRemaining;
+  const circ=2*Math.PI*98,fill=document.getElementById('timer-ring-fill');
+  fill.style.strokeDashoffset=circ*(timerRemaining/timerTotal);
+  fill.style.stroke=timerRemaining<=5?'#FF4757':timerRemaining<=15?'#FF9F43':'#E8591A';
+}
+function skipTimer(){clearInterval(timerInterval);document.getElementById('timer-overlay').classList.remove('show');}
+
+function showPhaseDoneBanner(){
+  const b=document.createElement('div');
+  b.style.cssText='position:fixed;bottom:calc(env(safe-area-inset-bottom,20px) + 20px);left:16px;right:16px;background:linear-gradient(135deg,#E8591A,#FF7A3D);color:white;border-radius:16px;padding:16px 20px;font-family:"Barlow Condensed",sans-serif;font-size:18px;font-weight:700;letter-spacing:1px;text-align:center;z-index:100;text-transform:uppercase;';
+  const next=PHASES[currentPhaseIdx+1];
+  b.textContent='✓ Phase terminée ! → '+(next?.name||'Séance finie !');
+  document.body.appendChild(b);
+  setTimeout(()=>b.remove(),3000);
+  if(currentPhaseIdx+1<PHASES.length){setTimeout(()=>{currentPhaseIdx++;renderWorkout();const l=document.getElementById('exercises-list');if(l)l.scrollTop=0;},1200);}
+}
+
+function showComplete(){
+  let te=0,ts=0;PHASES.forEach(p=>{te+=p.exercises.length;p.exercises.forEach(ex=>ts+=ex.sets);});
+  const mins=workoutStart?Math.round((Date.now()-workoutStart)/60000):75;
+  document.getElementById('stat-exos').textContent=te;
+  document.getElementById('stat-sets').textContent=ts;
+  document.getElementById('stat-time').textContent=mins;
+  showScreen('complete');
+}
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function goHome(){renderHome();showScreen('home');}
+function confirmReset(){if(confirm('Remettre toute la séance à zéro ?')){state=defaultState();workoutStart=null;saveState();renderHome();}}
+
+loadState();
+renderHome();
+</script>
+</body>
+</html>
